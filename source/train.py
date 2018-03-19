@@ -26,7 +26,7 @@ FLAGS = tf.app.flags.FLAGS
 
 tf.app.flags.DEFINE_string('dataset', 'KITTI',
                            """Currently only support KITTI dataset.""")
-tf.app.flags.DEFINE_string('data_path', 'C:/Users/nikpop/PycharmProjects/KittiSqueezeD/data/KITTI', """Root directory of data""")
+tf.app.flags.DEFINE_string('data_path', 'C:/Users/Popjo/PycharmProjects/SqueeDKitti/data/KITTI/', """Root directory of data""")
 tf.app.flags.DEFINE_string('image_set', 'train',
                            """ Can be train, trainval, val, or test""")
 tf.app.flags.DEFINE_string('year', '2007',
