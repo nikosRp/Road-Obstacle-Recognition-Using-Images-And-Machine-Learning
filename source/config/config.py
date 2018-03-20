@@ -23,7 +23,7 @@ def base_model_config(dataset='PASCAL_VOC'):
                        'horse', 'motorbike', 'person', 'pottedplant', 'sheep',
                        'sofa', 'train', 'tvmonitor')
   elif cfg.DATASET == 'KITTI':
-    cfg.CLASS_NAMES = ('car', 'pedestrian', 'cyclist', 'truck', 'van', 'tram', 'misc', 'person_sitting')
+    cfg.CLASS_NAMES = ('car', 'pedestrian', 'cyclist', 'truck')#<---------------change!
 
   # number of categories to classify
   cfg.CLASSES = len(cfg.CLASS_NAMES)    
@@ -137,6 +137,6 @@ def base_model_config(dataset='PASCAL_VOC'):
   cfg.QUEUE_CAPACITY = 100
 
   # indicate if the model is in training mode
-  cfg.IS_TRAINING = False
+  cfg.IS_TRAINING = True
 
   return cfg

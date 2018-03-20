@@ -32,14 +32,14 @@ tf.app.flags.DEFINE_string('image_set', 'train',
 tf.app.flags.DEFINE_string('year', '2007',
                             """VOC challenge year. 2007 or 2012"""
                             """Only used for Pascal VOC dataset""")
-tf.app.flags.DEFINE_string('train_dir', '/tmp/bichen/logs/squeezeDet/train',
+tf.app.flags.DEFINE_string('train_dir', '/tmp/bichen/logs/squeezeDet/train', #<--------------- -v ?
                             """Directory where to write event logs """
                             """and checkpoint.""")
 tf.app.flags.DEFINE_integer('max_steps', 300000,
                             """Maximum number of batches to run.""")
 tf.app.flags.DEFINE_string('net', 'squeezeDet',
                            """Neural net architecture. """)
-tf.app.flags.DEFINE_string('pretrained_model_path', 'C:/Users/nikpop/PycharmProjects/KittiSqueezeD/data/squeezeDet/model.ckpt-87000',
+tf.app.flags.DEFINE_string('pretrained_model_path', '',
                            """Path to the pretrained model.""")
 tf.app.flags.DEFINE_integer('summary_step', 10,
                             """Number of steps to save summary.""")
