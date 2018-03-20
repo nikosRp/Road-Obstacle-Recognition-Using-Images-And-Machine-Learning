@@ -2,10 +2,6 @@
 
 """Train"""
 
-
-
-
-
 import cv2
 from datetime import datetime
 import os.path
@@ -17,7 +13,8 @@ from six.moves import xrange
 import tensorflow as tf
 import threading
 
-from source.config import *
+# from source.config import *
+import source.config as cn
 from source.dataset import pascal_voc, kitti
 from source.utils.util import sparse_to_dense, bgr_to_rgb, bbox_transform
 from source.nets import *
@@ -112,22 +109,22 @@ def train():
         or FLAGS.net == 'squeezeDet' or FLAGS.net == 'squeezeDet+', \
         'Selected neural net architecture not supported: {}'.format(FLAGS.net)
     if FLAGS.net == 'vgg16':
-      mc = kitti_vgg16_config()
+      mc = cn.kitti_vgg16_config()
       mc.IS_TRAINING = True
       mc.PRETRAINED_MODEL_PATH = FLAGS.pretrained_model_path
       model = VGG16ConvDet(mc)
     elif FLAGS.net == 'resnet50':
-      mc = kitti_res50_config()
+      mc = cn.kitti_res50_config()
       mc.IS_TRAINING = True
       mc.PRETRAINED_MODEL_PATH = FLAGS.pretrained_model_path
       model = ResNet50ConvDet(mc)
     elif FLAGS.net == 'squeezeDet':
-      mc = kitti_squeezeDet_config()
+      mc = cn.kitti_squeezeDet_config()
       mc.IS_TRAINING = True
       mc.PRETRAINED_MODEL_PATH = FLAGS.pretrained_model_path
       model = SqueezeDet(mc)
     elif FLAGS.net == 'squeezeDet+':
-      mc = kitti_squeezeDetPlus_config()
+      mc = cn.kitti_squeezeDetPlus_config()
       mc.IS_TRAINING = True
       mc.PRETRAINED_MODEL_PATH = FLAGS.pretrained_model_path
       model = SqueezeDetPlus(mc)
