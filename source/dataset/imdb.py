@@ -9,7 +9,7 @@ import shutil
 from PIL import Image, ImageFont, ImageDraw
 import cv2
 import numpy as np
-from source.utils.util import iou, batch_iou
+from utils.util import iou, batch_iou
 
 class imdb(object):
   """Image database."""
