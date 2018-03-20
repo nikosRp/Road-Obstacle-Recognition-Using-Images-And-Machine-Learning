@@ -14,10 +14,10 @@ import tensorflow as tf
 import threading
 
 # from source.config import *
-import source.config as cn
-from source.dataset import pascal_voc, kitti
-from source.utils.util import sparse_to_dense, bgr_to_rgb, bbox_transform
-from source.nets import *
+import config as cn
+from dataset import pascal_voc, kitti
+from utils.util import sparse_to_dense, bgr_to_rgb, bbox_transform
+from nets import *
 
 FLAGS = tf.app.flags.FLAGS
 

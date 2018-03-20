@@ -14,7 +14,7 @@ from source.utils import util
 from easydict import EasyDict as edict
 import numpy as np
 import tensorflow as tf
-from source.nn_skeleton import ModelSkeleton
+from nn_skeleton import ModelSkeleton
 
 class SqueezeDet(ModelSkeleton):
   def __init__(self, mc, gpu_id=0):

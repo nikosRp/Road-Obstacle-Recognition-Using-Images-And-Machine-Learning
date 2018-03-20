@@ -5,7 +5,7 @@
 import os
 import sys
 
-from source.utils import util
+from utils import util
 from easydict import EasyDict as edict
 import numpy as np
 import tensorflow as tf

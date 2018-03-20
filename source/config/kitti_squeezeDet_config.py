@@ -4,7 +4,7 @@
 
 import numpy as np
 
-from source.config.config import base_model_config
+from config.config import base_model_config
 
 def kitti_squeezeDet_config():
   """Specify the parameters to tune below."""

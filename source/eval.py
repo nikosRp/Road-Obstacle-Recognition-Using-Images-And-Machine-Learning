@@ -12,10 +12,10 @@ import numpy as np
 from six.moves import xrange
 import tensorflow as tf
 
-from source.config import *
-from source.dataset import pascal_voc, kitti
-from source.utils.util import bbox_transform, Timer
-from source.nets import *
+from config import *
+from dataset import pascal_voc, kitti
+from utils.util import bbox_transform, Timer
+from nets import *
 
 FLAGS = tf.app.flags.FLAGS
 

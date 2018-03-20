@@ -7,8 +7,8 @@ import os
 import numpy as np
 import subprocess
 
-from source.dataset.imdb import imdb
-from source.utils.util import bbox_transform_inv, batch_iou
+from dataset.imdb import imdb
+from utils.util import bbox_transform_inv, batch_iou
 
 class kitti(imdb):
   def __init__(self, image_set, data_path, mc):
