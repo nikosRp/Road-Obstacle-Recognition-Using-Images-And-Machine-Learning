@@ -13,7 +13,6 @@ from six.moves import xrange
 import tensorflow as tf
 import threading
 
-# from source.config import *
 from config import *
 from dataset import pascal_voc, kitti
 from utils.util import sparse_to_dense, bgr_to_rgb, bbox_transform
