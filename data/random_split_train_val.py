@@ -1,6 +1,7 @@
 import numpy as np
 
-image_set_dir = 'C:/Users/nikpop/PycharmProjects/squeezeDet/data/KITTI/ImageSets'
+# image_set_dir = 'C:/Users/nikpop/PycharmProjects/squeezeDet/data/KITTI/ImageSets'
+image_set_dir = 'C:/Users/Popjo/Desktop/sqDET/KITTI/ImageSets'
 trainval_file = image_set_dir+'/trainval.txt'
 train_file = image_set_dir+'/train.txt'
 val_file = image_set_dir+'/val.txt'
@@ -31,9 +32,13 @@ with open(train_file, 'w') as f:
     f.write('{}\n'.format(data[i]))
 f.close()
 
+# with open(val_file, 'w') as f:
+#   for i in val_idx:
+#     f.write('{}\n'.format(i))
+# f.close
 with open(val_file, 'w') as f:
   for i in val_idx:
-    f.write('{}\n'.format(i))
+    f.write('{}\n'.format(data[i]))
 f.close()
 
 print('Trainining set is saved to ' + train_file)
