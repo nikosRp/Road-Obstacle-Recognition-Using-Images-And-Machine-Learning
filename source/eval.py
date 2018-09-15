@@ -12,16 +12,16 @@ import numpy as np
 from six.moves import xrange
 import tensorflow as tf
 
-from config import *
-from dataset import pascal_voc, kitti
-from utils.util import bbox_transform, Timer
-from nets import *
+from src.config import *
+from src.dataset import pascal_voc, kitti
+from src.utils.util import bbox_transform, Timer
+from src.nets import *
 
 FLAGS = tf.app.flags.FLAGS
 
 tf.app.flags.DEFINE_string('dataset', 'KITTI',
                            """Currently support PASCAL_VOC or KITTI dataset.""")
-tf.app.flags.DEFINE_string('data_path', '', """Root directory of data""")
+tf.app.flags.DEFINE_string('data_path', 'C:/Users/Popjo/Desktop/sqDET/KITTI', """Root directory of data""")
 tf.app.flags.DEFINE_string('image_set', 'test',
                            """Only used for VOC data."""
                            """Can be train, trainval, val, or test""")
@@ -44,8 +44,11 @@ tf.app.flags.DEFINE_string('gpu', '0', """gpu id.""")
 def eval_once(
         saver, ckpt_path, summary_writer, eval_summary_ops, eval_summary_phs, imdb,
         model):
+    ckpt_path = ckpt_path.replace("\\", "/")
     with tf.Session(config=tf.ConfigProto(allow_soft_placement=True)) as sess:
-
+        # pa8=ckpt_path
+        # pa8=pa8.replace("\\", "/")
+        # ckpt_path.replace("\\", "/")
         # Restores from checkpoint
         saver.restore(sess, ckpt_path)
         # Assuming model_checkpoint_path looks something like:
@@ -94,7 +97,7 @@ def eval_once(
         print('Evaluating detections...')
         aps, ap_names = imdb.evaluate_detections(
             FLAGS.eval_dir, global_step, all_boxes)
-
+        num_images = num_images + 1
         print('Evaluation summary:')
         print('  Average number of detections per image: {}:'.format(
             num_detection / num_images))
@@ -130,11 +133,14 @@ def eval_once(
 
 
 def evaluate():
+    a = FLAGS.checkpoint_path
     """Evaluate."""
     assert FLAGS.dataset == 'KITTI', \
         'Currently only supports KITTI dataset'
 
     os.environ['CUDA_VISIBLE_DEVICES'] = FLAGS.gpu
+    # os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
+
 
     with tf.Graph().as_default() as g:
 
@@ -203,6 +209,8 @@ def evaluate():
         summary_writer = tf.summary.FileWriter(FLAGS.eval_dir, g)
 
         ckpts = set()
+        # tex = ckpts[0]
+        # ckpts[0].replace("\\", "/")
         while True:
             if FLAGS.run_once:
                 # When run_once is true, checkpoint_path should point to the exact
@@ -214,18 +222,30 @@ def evaluate():
             else:
                 # When run_once is false, checkpoint_path should point to the directory
                 # that stores checkpoint files.
-                ckpt = tf.train.get_checkpoint_state(FLAGS.checkpoint_path)
+                ckpath = FLAGS.checkpoint_path
+                ckpath = ckpath.replace("\\", "/")
+                ckpt = tf.train.get_checkpoint_state(ckpath)
+                # ckpt.replace("\\", "/")
                 if ckpt and ckpt.model_checkpoint_path:
+                    wat = ckpt.model_checkpoint_path
+                    wat = wat.replace("\\", "/")
+                    bl = ckpts
                     if ckpt.model_checkpoint_path in ckpts:
                         # Do not evaluate on the same checkpoint
                         print('Wait {:d}s for new checkpoints to be saved ... '
                               .format(FLAGS.eval_interval_secs))
                         time.sleep(FLAGS.eval_interval_secs)
                     else:
-                        ckpts.add(ckpt.model_checkpoint_path)
-                        print('Evaluating {}...'.format(ckpt.model_checkpoint_path))
+                        tex = ckpt.model_checkpoint_path
+                        # pa8 = ckpt.model_checkpoint_path
+                        # p999 = pa8.replace("\\", "/")
+                        tex = tex.replace("\\", "/")
+                        ckpts.add(tex)
+                        # ckpts.add(ckpt.model_checkpoint_path)
+
+                        print('Evaluating {}...'.format(tex))
                         eval_once(
-                            saver, ckpt.model_checkpoint_path, summary_writer,
+                            saver, tex, summary_writer,
                             eval_summary_ops, eval_summary_phs, imdb, model)
                 else:
                     print('No checkpoint file found')

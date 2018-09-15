@@ -10,11 +10,11 @@ import os
 import sys
 
 import joblib
-from utils import util
+from src.utils import util
 from easydict import EasyDict as edict
 import numpy as np
 import tensorflow as tf
-from nn_skeleton import ModelSkeleton
+from src.nn_skeleton import ModelSkeleton
 
 
 class ResNet50ConvDet(ModelSkeleton):

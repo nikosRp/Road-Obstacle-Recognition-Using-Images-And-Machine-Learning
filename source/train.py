@@ -2,6 +2,10 @@
 
 """Train"""
 
+
+
+import datetime
+import xlwt
 import cv2
 from datetime import datetime
 import os.path
@@ -13,29 +17,31 @@ from six.moves import xrange
 import tensorflow as tf
 import threading
 
-from config import *
-from dataset import pascal_voc, kitti
-from utils.util import sparse_to_dense, bgr_to_rgb, bbox_transform
-from nets import *
+from src.config import *
+from src.dataset import pascal_voc, kitti
+from src.utils.util import sparse_to_dense, bgr_to_rgb, bbox_transform
+from src.nets import *
 
 FLAGS = tf.app.flags.FLAGS
 
 tf.app.flags.DEFINE_string('dataset', 'KITTI',
                            """Currently only support KITTI dataset.""")
-tf.app.flags.DEFINE_string('data_path', 'C:/Users/Popjo/PycharmProjects/SqueeDKitti/data/KITTI/', """Root directory of data""")
+# tf.app.flags.DEFINE_string('data_path', 'C:/Users/nikpop/PycharmProjects/squeezeDet/data/KITTI', """Root directory of data""")
+tf.app.flags.DEFINE_string('data_path', 'C:/Users/Popjo/Desktop/sqDET/KITTI', """Root directory of data""")
+
 tf.app.flags.DEFINE_string('image_set', 'train',
                            """ Can be train, trainval, val, or test""")
 tf.app.flags.DEFINE_string('year', '2007',
                             """VOC challenge year. 2007 or 2012"""
                             """Only used for Pascal VOC dataset""")
-tf.app.flags.DEFINE_string('train_dir', '/tmp/bichen/logs/squeezeDet/train', #<--------------- -v ?
+tf.app.flags.DEFINE_string('train_dir', '/tmp/bichen/logs/squeezeDet/train',
                             """Directory where to write event logs """
                             """and checkpoint.""")
-tf.app.flags.DEFINE_integer('max_steps', 300000,
+tf.app.flags.DEFINE_integer('max_steps', 200000,
                             """Maximum number of batches to run.""")
 tf.app.flags.DEFINE_string('net', 'squeezeDet',
                            """Neural net architecture. """)
-tf.app.flags.DEFINE_string('pretrained_model_path', '',
+tf.app.flags.DEFINE_string('pretrained_model_path', 'C:/Users/nikpop/PycharmProjects/squeezeDet/temp/bichen/logs/squeezeDet/train/model.ckpt-22000',
                            """Path to the pretrained model.""")
 tf.app.flags.DEFINE_integer('summary_step', 10,
                             """Number of steps to save summary.""")
@@ -43,6 +49,8 @@ tf.app.flags.DEFINE_integer('checkpoint_step', 1000,
                             """Number of steps to save summary.""")
 tf.app.flags.DEFINE_string('gpu', '0', """gpu id.""")
 
+global n
+n=0
 
 def _draw_box(im, box_list, label_list, color=(0,255,0), cdict=None, form='center'):
   assert form == 'center' or form == 'diagonal', \
@@ -96,6 +104,31 @@ def _viz_prediction_result(model, images, bboxes, labels, batch_det_bbox,
 
 
 def train():
+  row = 1
+  sum = 0
+  wb = xlwt.Workbook()
+  ws = wb.add_sheet('A Test Sheet')
+
+  col1_name = 'datetime'
+  col2_name = 'step'
+  col3_name = 'loss'
+  col4_name = 'conf_loss'
+  col5_name = 'bbox_loss'
+  col6_name = 'class_loss'
+  col7_name = 'images_per_sec'
+  col8_name = 'seconds_per_batch'
+  col9_name = 'loss_sum/step'
+
+  ws.write(0, 0, col1_name)
+  ws.write(0, 1, col2_name)
+  ws.write(0, 2, col3_name)
+  ws.write(0, 3, col4_name)
+  ws.write(0, 4, col5_name)
+  ws.write(0, 5, col6_name)
+  ws.write(0, 6, col7_name)
+  ws.write(0, 7, col8_name)
+  ws.write(0, 8, col9_name)
+
   """Train SqueezeDet model"""
   assert FLAGS.dataset == 'KITTI', \
       'Currently only support KITTI dataset'
@@ -275,7 +308,7 @@ def train():
         op_list = [
             model.train_op, model.loss, summary_op, model.det_boxes,
             model.det_probs, model.det_class, model.conf_loss,
-            model.bbox_loss, model.class_loss
+            model.bbox_loss, model.class_loss,
         ]
         _, loss_value, summary_str, det_boxes, det_probs, det_class, \
             conf_loss, bbox_loss, class_loss = sess.run(
@@ -319,6 +352,22 @@ def train():
                       'sec/batch)')
         print (format_str % (datetime.now(), step, loss_value,
                              images_per_sec, sec_per_batch))
+
+        current_datetime = datetime.now()
+
+        sum = sum + loss_value
+        ws.write(row, 0, current_datetime.strftime('%x %X'))
+        ws.write(row, 1, step)
+        ws.write(row, 2, float(loss_value))
+        ws.write(row, 3, float(conf_loss))
+        ws.write(row, 4, float(bbox_loss))
+        ws.write(row, 5, float(class_loss))
+        ws.write(row, 6, float(images_per_sec))
+        ws.write(row, 7, float(sec_per_batch))
+        ws.write(row, 8, float(sum/step))
+        row = row + 1
+        wb.save('results.xls')
+
         sys.stdout.flush()
 
       # Save the model checkpoint periodically.
@@ -338,6 +387,7 @@ def main(argv=None):  # pylint: disable=unused-argument
     tf.gfile.DeleteRecursively(FLAGS.train_dir)
   tf.gfile.MakeDirs(FLAGS.train_dir)
   train()
+  # _viz_prediction_result()
 
 
 if __name__ == '__main__':

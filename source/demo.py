@@ -16,26 +16,29 @@ import glob
 import numpy as np
 import tensorflow as tf
 
-from source.config import *
-from source.train import _draw_box
-from source.nets.squeezeDet import *
-from source.nets.resnet50_convDet import *
-from source.nets.squeezeDetPlus import *
-from source.nets.vgg16_convDet import *
+from src.config import *
+from src.train import _draw_box
+from src.nets.squeezeDet import *
+from src.nets.resnet50_convDet import *
+from src.nets.squeezeDetPlus import *
+from src.nets.vgg16_convDet import *
 
 FLAGS = tf.app.flags.FLAGS
 
 tf.app.flags.DEFINE_string(
     'mode', 'image', """'image' or 'video'.""")
 tf.app.flags.DEFINE_string(
-    'checkpoint', 'C:/Users/nikpop/PycharmProjects/squeezeDet/data/model_checkpoints/squeezeDet/model.ckpt-87000',
+    'checkpoint', 'C:/tmp/bichen/logs/squeezeDet/train/model.ckpt-160000',
     """Path to the model parameter file.""")
+# tf.app.flags.DEFINE_string(
+#     'checkpoint', 'C:/Users/nikpop/PycharmProjects/squeezeDet/data/model_checkpoints/squeezeDet/model.ckpt-87000',
+#     """Path to the model parameter file.""")
 tf.app.flags.DEFINE_string(
-    'input_path', 'C:/Users/nikpop/PycharmProjects/squeezeDet/data/*.png',
+    'input_path', 'C:/Users/Popjo/Desktop/sqDET/squeezeDet/data/*.png',
     """Input image or video to be detected. Can process glob input such as """
     """C:/Users/nikpop/PycharmProjects/squeezeDet/data/00000*.png.""")
 tf.app.flags.DEFINE_string(
-    'out_dir', 'C:/Users/nikpop/PycharmProjects/squeezeDet/data/out/testing', """Directory to dump output image or video.""")
+    'out_dir', 'C:/Users/Popjo/Desktop/sqDET/squeezeDet/data/out/testing', """Directory to dump output image or video.""")
 tf.app.flags.DEFINE_string(
     'demo_net', 'squeezeDet', """Neural net architecture.""")
 

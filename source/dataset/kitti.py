@@ -7,8 +7,8 @@ import os
 import numpy as np
 import subprocess
 
-from dataset.imdb import imdb
-from utils.util import bbox_transform_inv, batch_iou
+from src.dataset.imdb import imdb
+from src.utils.util import bbox_transform_inv, batch_iou
 
 class kitti(imdb):
   def __init__(self, image_set, data_path, mc):
@@ -32,11 +32,12 @@ class kitti(imdb):
     # TODO(bichen): add a random seed as parameter
     self._shuffle_image_idx()
 
-    self._eval_tool = './src/dataset/kitti-eval/cpp/evaluate_object'
+    self._eval_tool = 'C:/Users/Popjo/Desktop/sqDET/squeezeDet/src/dataset/kitti-eval/cpp/evaluate_object.cpp'
 
   def _load_image_set_idx(self):
-    image_set_file = os.path.join(
-        self._data_root_path, 'ImageSets', self._image_set+'.txt')
+    # image_set_file = os.path.join(
+    #     self._data_root_path, 'ImageSets', self._image_set+'.txt')
+    image_set_file = 'C:/Users/Popjo/Desktop/sqDET/KITTI/ImageSets/val.txt'
     assert os.path.exists(image_set_file), \
         'File does not exist: {}'.format(image_set_file)
 
@@ -46,9 +47,14 @@ class kitti(imdb):
 
   def _image_path_at(self, idx):
     image_path = os.path.join(self._image_path, idx+'.png')
-    assert os.path.exists(image_path), \
-        'Image does not exist: {}'.format(image_path)
-    return image_path
+    a = image_path
+    b = idx
+    #image_path = image_path+idx+'.png'
+    impath = 'C:/Users/Popjo/Desktop/sqDET/KITTI/training/image_2'
+    finalpath = impath+'/'+idx+'.png'
+    assert os.path.exists(finalpath), \
+        'Image does not exist: {}'.format(finalpath)
+    return finalpath
 
   def _load_kitti_annotation(self):
     def _get_obj_level(obj):
@@ -68,6 +74,7 @@ class kitti(imdb):
     new = self._image_idx
     for index in self._image_idx:
       filename = os.path.join(self._label_path, index+'.txt')
+      filename = filename.replace("\\", "/")
       with open(filename, 'r') as f:
         lines = f.readlines()
       f.close()
@@ -111,11 +118,13 @@ class kitti(imdb):
     """
     det_file_dir = os.path.join(
         eval_dir, 'detection_files_{:s}'.format(global_step), 'data')
+    det_file_dir = det_file_dir.replace("\\", "/")
     if not os.path.isdir(det_file_dir):
       os.makedirs(det_file_dir)
 
     for im_idx, index in enumerate(self._image_idx):
       filename = os.path.join(det_file_dir, index+'.txt')
+      filename = filename.replace("\\", "/")
       with open(filename, 'wt') as f:
         for cls_idx, cls in enumerate(self._classes):
           dets = all_boxes[cls_idx][im_idx]
@@ -126,21 +135,25 @@ class kitti(imdb):
                     cls.lower(), dets[k][0], dets[k][1], dets[k][2], dets[k][3],
                     dets[k][4])
             )
-
-    cmd = self._eval_tool + ' ' \
+    # value = os.path.dirname(det_file_dir)
+    # value2 = 'C:/' + value
+    cmd = 'C:/Users/Popjo/Desktop/sqDET/squeezeDet/src/dataset/kitti-eval/cpp/evaluate_object' + ' ' \
           + os.path.join(self._data_root_path, 'training') + ' ' \
           + os.path.join(self._data_root_path, 'ImageSets',
-                         self._image_set+'.txt') + ' ' \
-          + os.path.dirname(det_file_dir) + ' ' + str(len(self._image_idx))
-
+                         'C:/Users/Popjo/Desktop/sqDET/KITTI/ImageSets/train.txt') + ' ' \
+          + 'C:' + os.path.dirname(det_file_dir) + ' ' + str(len(self._image_idx))
+    cmd = cmd.replace("\\", "/")
     print(('Running: {}'.format(cmd)))
     status = subprocess.call(cmd, shell=True)
+    # stat = subprocess.call('C:/Users/Popjo/Desktop/sqDET/squeezeDet/src/dataset/kitti-eval/cpp/evaluate_object', shell=True)
+    # stat1 = subprocess.call('C:/Users/Popjo/Desktop/sqDET/squeezeDet/src/dataset/kitti-eval/cpp', shell=True)
 
     aps = []
     names = []
     for cls in self._classes:
       det_file_name = os.path.join(
           os.path.dirname(det_file_dir), 'stats_{:s}_ap.txt'.format(cls))
+      det_file_name = det_file_name.replace("\\", "/")
       if os.path.exists(det_file_name):
         with open(det_file_name, 'r') as f:
           lines = f.readlines()
@@ -165,9 +178,12 @@ class kitti(imdb):
     det_error_dir = os.path.join(
         eval_dir, 'detection_files_{:s}'.format(global_step),
         'error_analysis')
+    det_error_dir = det_error_dir.replace("\\", "/")
+    det_file_dir = det_file_dir.replace("\\", "/")
     if not os.path.exists(det_error_dir):
       os.makedirs(det_error_dir)
     det_error_file = os.path.join(det_error_dir, 'det_error_file.txt')
+    det_error_file = det_error_file.replace("\\", "/")
 
     stats = self.analyze_detections(det_file_dir, det_error_file)
     ims = self.visualize_detections(
@@ -267,6 +283,10 @@ class kitti(imdb):
             _save_detection(f, idx, 'missed', gt, -1.0)
         num_detected_obj += sum(detected)
     f.close()
+    if num_dets==0:
+      num_dets +=1
+    if num_objs==0:
+      num_objs+=1
 
     print ('Detection Analysis:')
     print(('    Number of detections: {}'.format(num_dets)))

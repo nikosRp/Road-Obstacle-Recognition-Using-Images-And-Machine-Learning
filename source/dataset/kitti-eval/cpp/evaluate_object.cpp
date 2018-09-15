@@ -25,8 +25,8 @@ string ospj( string const & a, string const & b, string const & c ) { return a +
 enum DIFFICULTY{EASY=0, MODERATE=1, HARD=2};
 
 // evaluation parameter
-const int32_t MIN_HEIGHT[3]     = {40, 25, 25};     // minimum height for evaluated groundtruth/detections
-const int32_t MAX_OCCLUSION[3]  = {0, 1, 2};        // maximum occlusion level of the groundtruth used for evaluation
+const double MIN_HEIGHT[3]     = {40, 25, 25};     // minimum height for evaluated groundtruth/detections
+const double MAX_OCCLUSION[3]  = {0, 1, 2};        // maximum occlusion level of the groundtruth used for evaluation
 const double  MAX_TRUNCATION[3] = {0.15, 0.3, 0.5}; // maximum truncation level of the groundtruth used for evaluation
 
 // evaluated object classes
@@ -54,9 +54,9 @@ DATA TYPES FOR EVALUATION
 struct tPrData {
   vector<double> v;           // detection score for computing score thresholds
   double         similarity;  // orientation similarity
-  int32_t        tp;          // true positives
-  int32_t        fp;          // false positives
-  int32_t        fn;          // false negatives
+  double        tp;          // true positives
+  double        fp;          // false positives
+  double        fn;          // false negatives
   tPrData () :
     similarity(0), tp(0), fp(0), fn(0) {}
 };
@@ -77,12 +77,12 @@ struct tBox {
 struct tGroundtruth {
   tBox    box;        // object type, box, orientation
   double  truncation; // truncation 0..1
-  int32_t occlusion;  // occlusion 0,1,2 (non, partly, fully)
+  double occlusion;  // occlusion 0,1,2 (non, partly, fully)
   tGroundtruth () :
     box(tBox("invalild",-1,-1,-1,-1,-10)),truncation(-1),occlusion(-1) {}
-  tGroundtruth (tBox box,double truncation,int32_t occlusion) :
+  tGroundtruth (tBox box,double truncation,double occlusion) :
     box(box),truncation(truncation),occlusion(occlusion) {}
-  tGroundtruth (string type,double x1,double y1,double x2,double y2,double alpha,double truncation,int32_t occlusion) :
+  tGroundtruth (string type,double x1,double y1,double x2,double y2,double alpha,double truncation,double occlusion) :
     box(tBox(type,x1,y1,x2,y2,alpha)),truncation(truncation),occlusion(occlusion) {}
 };
 
@@ -106,7 +106,7 @@ vector<tDetection> loadDetections(string file_name, bool &compute_aos, bool &eva
 
   // holds all detections (ignored detections are indicated by an index vector
   vector<tDetection> detections;
-  FILE *fp = fopen(file_name.c_str(),"r");
+  FILE *fp = fopen(file_name.c_str(), "r");
   if (!fp) {
     success = false;
     return detections;
@@ -174,8 +174,8 @@ void saveStats (const vector<double> &precision, const vector<double> &aos, FILE
   if(precision.empty())
     return;
   double AP=0;
-  uint AP_cnt = 0;
-  for (int32_t i=0; i<precision.size(); i += 4)
+  double AP_cnt = 0;
+  for (double i=0; i<precision.size(); i += 4)
   {
     AP += precision[i];
     ++AP_cnt;
@@ -189,7 +189,7 @@ void saveStats (const vector<double> &precision, const vector<double> &aos, FILE
   // save orientation similarity, only if there were no invalid orientation entries in submission (alpha=-10)
   if(aos.empty())
     return;
-  for (int32_t i=0; i<aos.size(); i++)
+  for (double i=0; i<aos.size(); i++)
     fprintf(fp_ori,"%f ",aos[i]);
   fprintf(fp_ori,"\n");
 }
@@ -200,7 +200,7 @@ EVALUATION HELPER FUNCTIONS
 
 // criterion defines whether the overlap is computed with respect to both areas (ground truth and detection)
 // or with respect to box a or b (detection and "dontcare" areas)
-inline double boxoverlap(tBox a, tBox b, int32_t criterion=-1){
+inline double boxoverlap(tBox a, tBox b, double criterion=-1){
 
   // overlap is invalid in the beginning
   double o = -1;
@@ -247,7 +247,7 @@ vector<double> getThresholds(vector<double> &v, double n_groundtruth){
 
   // get scores for linearly spaced recall
   double current_recall = 0;
-  for(int32_t i=0; i<v.size(); i++){
+  for(double i=0; i<v.size(); i++){
 
     // check if right-hand-side recall with respect to current recall is close than left-hand-side one
     // in this case, skip the current detection score
@@ -271,17 +271,17 @@ vector<double> getThresholds(vector<double> &v, double n_groundtruth){
   return t;
 }
 
-void cleanData(CLASSES current_class, const vector<tGroundtruth> &gt, const vector<tDetection> &det, vector<int32_t> &ignored_gt, vector<tGroundtruth> &dc, vector<int32_t> &ignored_det, int32_t &n_gt, DIFFICULTY difficulty){
+void cleanData(CLASSES current_class, const vector<tGroundtruth> &gt, const vector<tDetection> &det, vector<double> &ignored_gt, vector<tGroundtruth> &dc, vector<double> &ignored_det, double &n_gt, DIFFICULTY difficulty){
 
   // extract ground truth bounding boxes for current evaluation class
-  for(int32_t i=0;i<gt.size(); i++){
+  for(double i=0;i<gt.size(); i++){
 
     // only bounding boxes with a minimum height are used for evaluation
     double height = gt[i].box.y2 - gt[i].box.y1;
 
     // neighboring classes are ignored ("van" for "car" and "person_sitting" for "pedestrian")
     // (lower/upper cases are ignored)
-    int32_t valid_class;
+    double valid_class;
 
     // all classes without a neighboring class
     if(!strcasecmp(gt[i].box.type.c_str(), CLASS_NAMES[current_class].c_str()))
@@ -320,15 +320,15 @@ void cleanData(CLASSES current_class, const vector<tGroundtruth> &gt, const vect
   }
 
   // extract dontcare areas
-  for(int32_t i=0;i<gt.size(); i++)
+  for(double i=0;i<gt.size(); i++)
     if(!strcasecmp("DontCare", gt[i].box.type.c_str()))
       dc.push_back(gt[i]);
 
   // extract detections bounding boxes of the current class
-  for(int32_t i=0;i<det.size(); i++){
+  for(double i=0;i<det.size(); i++){
 
     // neighboring classes are not evaluated
-    int32_t valid_class;
+    double valid_class;
     if(!strcasecmp(det[i].box.type.c_str(), CLASS_NAMES[current_class].c_str()))
       valid_class = 1;
     else
@@ -342,7 +342,7 @@ void cleanData(CLASSES current_class, const vector<tGroundtruth> &gt, const vect
   }
 }
 
-tPrData computeStatistics(CLASSES current_class, const vector<tGroundtruth> &gt, const vector<tDetection> &det, const vector<tGroundtruth> &dc, const vector<int32_t> &ignored_gt, const vector<int32_t>  &ignored_det, bool compute_fp, bool compute_aos=false, double thresh=0, bool debug=false){
+tPrData computeStatistics(CLASSES current_class, const vector<tGroundtruth> &gt, const vector<tDetection> &det, const vector<tGroundtruth> &dc, const vector<double> &ignored_gt, const vector<double>  &ignored_det, bool compute_fp, bool compute_aos=false, double thresh=0, bool debug=false){
 
   tPrData stat = tPrData();
   const double NO_DETECTION = -10000000;
@@ -354,12 +354,12 @@ tPrData computeStatistics(CLASSES current_class, const vector<tGroundtruth> &gt,
 
   // detections with a low score are ignored for computing precision (needs FP)
   if(compute_fp)
-    for(int32_t i=0; i<det.size(); i++)
+    for(double i=0; i<det.size(); i++)
       if(det[i].thresh<thresh)
         ignored_threshold[i] = true;
 
   // evaluate all ground truth boxes
-  for(int32_t i=0; i<gt.size(); i++){
+  for(double i=0; i<gt.size(); i++){
 
     // this ground truth is not of the current or a neighboring class and therefore ignored
     if(ignored_gt[i]==-1)
@@ -368,13 +368,13 @@ tPrData computeStatistics(CLASSES current_class, const vector<tGroundtruth> &gt,
     /*=======================================================================
     find candidates (overlap with ground truth > 0.5) (logical len(det))
     =======================================================================*/
-    int32_t det_idx          = -1;
+    double det_idx          = -1;
     double valid_detection = NO_DETECTION;
     double max_overlap     = 0;
 
     // search for a possible detection
     bool assigned_ignored_det = false;
-    for(int32_t j=0; j<det.size(); j++){
+    for(double j=0; j<det.size(); j++){
 
       // detections not of the current class, already assigned or with a low threshold are ignored
       if(ignored_det[j]==-1)
@@ -440,7 +440,7 @@ tPrData computeStatistics(CLASSES current_class, const vector<tGroundtruth> &gt,
   if(compute_fp){
 
     // count fp
-    for(int32_t i=0; i<det.size(); i++){
+    for(double i=0; i<det.size(); i++){
 
       // count false positives if required (height smaller than required is ignored (ignored_det==1)
       if(!(assigned_detection[i] || ignored_det[i]==-1 || ignored_det[i]==1 || ignored_threshold[i]))
@@ -448,9 +448,9 @@ tPrData computeStatistics(CLASSES current_class, const vector<tGroundtruth> &gt,
     }
 
     // do not consider detections overlapping with stuff area
-    int32_t nstuff = 0;
-    for(int32_t i=0; i<dc.size(); i++){
-      for(int32_t j=0; j<det.size(); j++){
+    double nstuff = 0;
+    for(double i=0; i<dc.size(); i++){
+      for(double j=0; j<det.size(); j++){
 
         // detections not of the current class, already assigned, with a low threshold or a low minimum height are ignored
         if(assigned_detection[j])
@@ -478,7 +478,7 @@ tPrData computeStatistics(CLASSES current_class, const vector<tGroundtruth> &gt,
 
       // FP have a similarity of 0, for all TP compute AOS
       tmp.assign(stat.fp, 0);
-      for(int32_t i=0; i<delta.size(); i++)
+      for(double i=0; i<delta.size(); i++)
         tmp.push_back((1.0+cos(delta[i]))/2.0);
 
       // be sure, that all orientation deltas are computed
@@ -501,19 +501,19 @@ tPrData computeStatistics(CLASSES current_class, const vector<tGroundtruth> &gt,
 EVALUATE CLASS-WISE
 =======================================================================*/
 
-bool eval_class (FILE *fp_det, FILE *fp_ap, FILE *fp_ori, CLASSES current_class,const vector< vector<tGroundtruth> > &groundtruth,const vector< vector<tDetection> > &detections, bool compute_aos, vector<double> &precision, vector<double> &aos, DIFFICULTY difficulty, int32_t N_TESTIMAGES) {
+bool eval_class (FILE *fp_det, FILE *fp_ap, FILE *fp_ori, CLASSES current_class,const vector< vector<tGroundtruth> > &groundtruth,const vector< vector<tDetection> > &detections, bool compute_aos, vector<double> &precision, vector<double> &aos, DIFFICULTY difficulty, double N_TESTIMAGES) {
 
   // init
-  int32_t n_gt=0;                                     // total no. of gt (denominator of recall)
+  double n_gt=0;                                     // total no. of gt (denominator of recall)
   vector<double> v, thresholds;                       // detection scores, evaluated for recall discretization
-  vector< vector<int32_t> > ignored_gt, ignored_det;  // index of ignored gt detection for current class/difficulty
+  vector< vector<double> > ignored_gt, ignored_det;  // index of ignored gt detection for current class/difficulty
   vector< vector<tGroundtruth> > dontcare;            // index of dontcare areas, included in ground truth
 
   // for all test images do
-  for (int32_t i=0; i<N_TESTIMAGES; i++){
+  for (double i=0; i<N_TESTIMAGES; i++){
 
     // holds ignored ground truth, ignored detections and dontcare areas for current frame
-    vector<int32_t> i_gt, i_det;
+    vector<double> i_gt, i_det;
     vector<tGroundtruth> dc;
 
     // only evaluate objects of current class and ignore occluded, truncated objects
@@ -527,7 +527,7 @@ bool eval_class (FILE *fp_det, FILE *fp_ap, FILE *fp_ori, CLASSES current_class,
     pr_tmp = computeStatistics(current_class, groundtruth[i], detections[i], dc, i_gt, i_det, false);
 
     // add detection scores to vector over all images
-    for(int32_t j=0; j<pr_tmp.v.size(); j++)
+    for(double j=0; j<pr_tmp.v.size(); j++)
       v.push_back(pr_tmp.v[j]);
   }
 
@@ -537,10 +537,10 @@ bool eval_class (FILE *fp_det, FILE *fp_ap, FILE *fp_ori, CLASSES current_class,
   // compute TP,FP,FN for relevant scores
   vector<tPrData> pr;
   pr.assign(thresholds.size(),tPrData());
-  for (int32_t i=0; i<N_TESTIMAGES; i++){
+  for (double i=0; i<N_TESTIMAGES; i++){
 
     // for all scores/recall thresholds do:
-    for(int32_t t=0; t<thresholds.size(); t++){
+    for(double t=0; t<thresholds.size(); t++){
       tPrData tmp = tPrData();
       tmp = computeStatistics(current_class, groundtruth[i], detections[i], dontcare[i],
                               ignored_gt[i], ignored_det[i], true, compute_aos, thresholds[t], t==38);
@@ -560,7 +560,7 @@ bool eval_class (FILE *fp_det, FILE *fp_ap, FILE *fp_ori, CLASSES current_class,
   if(compute_aos)
     aos.assign(N_SAMPLE_PTS, 0);
   double r=0;
-  for (int32_t i=0; i<thresholds.size(); i++){
+  for (double i=0; i<thresholds.size(); i++){
     r = pr[i].tp/(double)(pr[i].tp + pr[i].fn);
     recall.push_back(r);
     precision[i] = pr[i].tp/(double)(pr[i].tp + pr[i].fp);
@@ -569,7 +569,7 @@ bool eval_class (FILE *fp_det, FILE *fp_ap, FILE *fp_ori, CLASSES current_class,
   }
 
   // filter precision and AOS using max_{i..end}(precision)
-  for (int32_t i=0; i<thresholds.size(); i++){
+  for (double i=0; i<thresholds.size(); i++){
     precision[i] = *max_element(precision.begin()+i, precision.end());
     if(compute_aos)
       aos[i] = *max_element(aos.begin()+i, aos.end());
@@ -586,12 +586,12 @@ void saveAndPlotPlots(string dir_name,string file_name,string obj_type,vector<do
 
   // save plot data to file
   FILE *fp = fopen((dir_name + "/" + file_name + ".txt").c_str(),"w");
-  for (int32_t i=0; i<(int)N_SAMPLE_PTS; i++)
+  for (double i=0; i<(int)N_SAMPLE_PTS; i++)
     fprintf(fp,"%f %f %f %f\n",(double)i/(N_SAMPLE_PTS-1.0),vals[0][i],vals[1][i],vals[2][i]);
   fclose(fp);
 
   // create png + eps
-  for (int32_t j=0; j<2; j++) {
+  for (double j=0; j<2; j++) {
 
     // open file
     FILE *fp = fopen((dir_name + "/" + file_name + ".gp").c_str(),"w");
@@ -616,7 +616,7 @@ void saveAndPlotPlots(string dir_name,string file_name,string obj_type,vector<do
     fprintf(fp,"set title \"%s\"\n",obj_type.c_str());
 
     // line width
-    int32_t   lw = 5;
+    double   lw = 5;
     if (j==0) lw = 3;
 
     // plot error curve
@@ -642,7 +642,7 @@ void saveAndPlotPlots(string dir_name,string file_name,string obj_type,vector<do
   system(command);
 }
 
-bool eval(string const & result_dir, string const & image_set_filename, string const & gt_dir,  Mail* mail, int32_t N_TESTIMAGES){
+bool eval(string const & result_dir, string const & image_set_filename, string const & gt_dir,  Mail* mail, double N_TESTIMAGES){
 
   // set some global parameters
   initGlobals();
@@ -679,11 +679,14 @@ bool eval(string const & result_dir, string const & image_set_filename, string c
   if( image_set.size() != N_TESTIMAGES ) {
     printf( "image_set.size()=%s N_TESTIMAGES=%s\n", str(image_set.size()).c_str(), str(N_TESTIMAGES).c_str() );
   }
-  assert(image_set.size() == N_TESTIMAGES);
+  if( image_set.size() == N_TESTIMAGES )
+  	assert(0);
+//  assert(image_set.size() == N_TESTIMAGES);
+  
 
   // for all images read groundtruth and detections
   mail->msg("Loading detections...");
-  for (int32_t i=0; i<N_TESTIMAGES; i++) {
+  for (double i=0; i<N_TESTIMAGES; i++) {
 
     // file name
     char file_name[256];
@@ -781,7 +784,7 @@ bool eval(string const & result_dir, string const & image_set_filename, string c
   return true;
 }
 
-int32_t main (int32_t argc,char *argv[]) {
+int main (int argc,char *argv[]) {
 
   // we need 4 arguments!
   if (argc!=5) {
@@ -794,7 +797,7 @@ int32_t main (int32_t argc,char *argv[]) {
   string const gt_dir             = ospj( kitti_dir, "label_2" ); // FIXME_MWM: should be part of input? configurable?
   string const image_set_filename = argv[2];
   string const result_dir         = argv[3];
-  int32_t const N_TESTIMAGES      = atoi(argv[4]);
+  double const N_TESTIMAGES      = atoi(argv[4]);
 
   // init notification mail
   Mail *mail = new Mail();

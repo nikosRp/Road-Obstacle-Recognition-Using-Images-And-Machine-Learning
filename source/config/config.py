@@ -23,7 +23,7 @@ def base_model_config(dataset='PASCAL_VOC'):
                        'horse', 'motorbike', 'person', 'pottedplant', 'sheep',
                        'sofa', 'train', 'tvmonitor')
   elif cfg.DATASET == 'KITTI':
-    cfg.CLASS_NAMES = ('car', 'pedestrian', 'cyclist', 'truck')#<---------------change!
+    cfg.CLASS_NAMES = ('car', 'pedestrian', 'cyclist', 'truck')
 
   # number of categories to classify
   cfg.CLASSES = len(cfg.CLASS_NAMES)    
@@ -56,7 +56,7 @@ def base_model_config(dataset='PASCAL_VOC'):
   cfg.ANCHOR_PER_GRID = -1
 
   # batch size
-  cfg.BATCH_SIZE = 20
+  cfg.BATCH_SIZE = 15
 
   # Only keep boxes with probability higher than this threshold
   cfg.PROB_THRESH = 0.005

@@ -9,7 +9,7 @@ import shutil
 from PIL import Image, ImageFont, ImageDraw
 import cv2
 import numpy as np
-from utils.util import iou, batch_iou
+from src.utils.util import iou, batch_iou
 
 class imdb(object):
   """Image database."""
@@ -291,6 +291,7 @@ class imdb(object):
 
       for i in range(min(num_det_per_type, len(dets))):
         det = dets[i]
+        image_dir = image_dir.replace("\\", "/")
         im = Image.open(
             os.path.join(image_dir, det['im_idx']+image_format))
         draw = ImageDraw.Draw(im)
